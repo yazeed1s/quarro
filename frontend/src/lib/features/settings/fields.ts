@@ -1,0 +1,260 @@
+import type { Preferences } from '../../state/types';
+import { workspace } from '../../state/workspace.svelte';
+export type SettingSection = 'Appearance' | 'Editor' | 'Results' | 'Connections' | 'Shortcuts' | 'Privacy' | 'Advanced';
+export interface Setting {
+    key: keyof Preferences;
+    section: SettingSection;
+    label: string;
+    description: string;
+    type: 'text' | 'number' | 'checkbox' | 'select';
+    min?: number;
+    max?: number;
+    step?: number;
+    options?: { value: string; label: string }[];
+    /** Hides the setting where it does not apply (e.g. another OS). */
+    available?: () => boolean;
+}
+const select = (values: string[]) => values.map((value) => ({ value, label: value[0].toUpperCase() + value.slice(1) }));
+export const fields: Setting[] = [
+    {
+        key: 'uiFont',
+        section: 'Appearance',
+        label: 'Interface font',
+        description: 'Installed font name. Inter is bundled for offline use.',
+        type: 'text',
+    },
+    {
+        key: 'uiSize',
+        section: 'Appearance',
+        label: 'Interface size',
+        description: 'Text size in pixels, independent of the editor.',
+        type: 'number',
+        min: 11,
+        max: 20,
+    },
+    {
+        key: 'density',
+        section: 'Appearance',
+        label: 'Interface density',
+        description: 'Comfortable is the standard spacing. Compact fits more controls and rows.',
+        type: 'select',
+        options: select(['comfortable', 'compact']),
+    },
+    {
+        key: 'zoom',
+        section: 'Appearance',
+        label: 'Application zoom',
+        description: 'Scale the whole workspace. Reset with Ctrl/⌘ + 0.',
+        type: 'number',
+        min: 75,
+        max: 150,
+        step: 5,
+    },
+    {
+        key: 'titleBar',
+        section: 'Appearance',
+        label: 'Title bar',
+        description: 'System uses your desktop’s window decorations. Quarro draws its own title bar using your interface density.',
+        type: 'select',
+        options: [
+            { value: 'system', label: 'System' },
+            { value: 'custom', label: 'Quarro' },
+        ],
+        available: () => workspace.desktop?.configurable === true,
+    },
+    {
+        key: 'appIcon',
+        section: 'Appearance',
+        label: 'App icon',
+        description: 'The Dock, taskbar or launcher icon. On macOS and Windows it applies while Quarro runs; on Linux it updates the app launcher.',
+        type: 'select',
+        options: select(['dark', 'light']),
+        available: () => workspace.desktop?.appIconConfigurable === true,
+    },
+    {
+        key: 'reducedMotion',
+        section: 'Appearance',
+        label: 'Reduce motion',
+        description: 'Minimize animation throughout the interface.',
+        type: 'checkbox',
+    },
+    {
+        key: 'editorFont',
+        section: 'Editor',
+        label: 'Editor font',
+        description: 'Installed monospace font, with a monospace fallback.',
+        type: 'text',
+    },
+    {
+        key: 'editorSize',
+        section: 'Editor',
+        label: 'Font size',
+        description: 'Editor text size in pixels.',
+        type: 'number',
+        min: 11,
+        max: 24,
+    },
+    {
+        key: 'lineHeight',
+        section: 'Editor',
+        label: 'Line height',
+        description: 'Space between lines of SQL.',
+        type: 'number',
+        min: 1.2,
+        max: 2.2,
+        step: 0.05,
+    },
+    {
+        key: 'ligatures',
+        section: 'Editor',
+        label: 'Font ligatures',
+        description: 'Use ligatures when your chosen font supports them.',
+        type: 'checkbox',
+    },
+    {
+        key: 'tabSize',
+        section: 'Editor',
+        label: 'Tab width',
+        description: 'Number of spaces in an indentation level.',
+        type: 'number',
+        min: 1,
+        max: 8,
+    },
+    {
+        key: 'indentTabs',
+        section: 'Editor',
+        label: 'Indent using tabs',
+        description: 'Use tab characters instead of spaces.',
+        type: 'checkbox',
+    },
+    {
+        key: 'lineNumbers',
+        section: 'Editor',
+        label: 'Line numbers',
+        description: 'Show the line-number gutter.',
+        type: 'checkbox',
+    },
+    {
+        key: 'wordWrap',
+        section: 'Editor',
+        label: 'Word wrap',
+        description: 'Wrap long statements to the available width.',
+        type: 'checkbox',
+    },
+    {
+        key: 'activeLine',
+        section: 'Editor',
+        label: 'Highlight active line',
+        description: 'Make your current editing position easy to find.',
+        type: 'checkbox',
+    },
+    {
+        key: 'gridFont',
+        section: 'Results',
+        label: 'Results font',
+        description: 'Independent from interface and editor typography.',
+        type: 'text',
+    },
+    {
+        key: 'gridSize',
+        section: 'Results',
+        label: 'Font size',
+        description: 'Grid text size in pixels.',
+        type: 'number',
+        min: 11,
+        max: 20,
+    },
+    {
+        key: 'rowHeight',
+        section: 'Results',
+        label: 'Row height',
+        description: 'Base row height in Comfortable mode. Compact reduces it by 6px; larger text sets a safe minimum.',
+        type: 'number',
+        min: 28,
+        max: 52,
+        step: 2,
+    },
+    {
+        key: 'stripes',
+        section: 'Results',
+        label: 'Alternating rows',
+        description: 'Use subtle alternating backgrounds in the grid.',
+        type: 'checkbox',
+    },
+    {
+        key: 'nullDisplay',
+        section: 'Results',
+        label: 'NULL label',
+        description: 'Display only. Stored and exported values stay unchanged.',
+        type: 'text',
+    },
+    {
+        key: 'dateFormat',
+        section: 'Results',
+        label: 'Date format',
+        description: 'Choose ISO-style or your system locale.',
+        type: 'select',
+        options: select(['iso', 'locale']),
+    },
+    {
+        key: 'timezone',
+        section: 'Results',
+        label: 'Display timezone',
+        description: 'Show timestamps in UTC or your local timezone.',
+        type: 'select',
+        options: [
+            { value: 'UTC', label: 'UTC' },
+            { value: 'local', label: 'Local timezone' },
+        ],
+    },
+    {
+        key: 'resultLimit',
+        section: 'Results',
+        label: 'Result row limit',
+        description: 'Maximum rows fetched per query or table page, and exported.',
+        type: 'number',
+        min: 1,
+        max: 10000,
+    },
+    {
+        key: 'connectionBehavior',
+        section: 'Connections',
+        label: 'Opening a connection',
+        description: 'Create an independent session or reuse the existing one.',
+        type: 'select',
+        options: [
+            { value: 'new', label: 'New session' },
+            { value: 'reuse', label: 'Reuse existing session' },
+        ],
+    },
+    {
+        key: 'restore',
+        section: 'Connections',
+        label: 'Restore workspace',
+        description: 'Remember demo sessions, query drafts, and panel sizes.',
+        type: 'checkbox',
+    },
+    {
+        key: 'checkUpdates',
+        section: 'Privacy',
+        label: 'Check for updates',
+        description: 'Once a day, ask GitHub whether a newer release exists. Only the app version is sent.',
+        type: 'checkbox',
+    },
+    {
+        key: 'rememberHistory',
+        section: 'Privacy',
+        label: 'Remember query history',
+        description: 'Store demo query text locally on this device.',
+        type: 'checkbox',
+    },
+    {
+        key: 'historyDays',
+        section: 'Privacy',
+        label: 'History retention',
+        description: 'Automatically discard history older than this many days.',
+        type: 'number',
+        min: 1,
+        max: 365,
+    },
+];

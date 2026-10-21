@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Quarro
+Exec=quarro
+Icon=quarro
+Categories=Development;Utility;
+Comment=A fast, native database client
+Terminal=false
+Keywords=database;sql;client;
+Version=1.0
+StartupNotify=false

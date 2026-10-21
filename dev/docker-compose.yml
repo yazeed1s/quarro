@@ -1,0 +1,111 @@
+name: quarro-dev
+
+# Four disposable, pre-seeded databases to point Quarro at during manual
+# testing — PostgreSQL, MySQL, MongoDB, and Redis. The production-shaped
+# commerce dataset has thousands of records, operational relationships,
+# views/routines, nested documents, indexes, streams, TTLs, and varied Redis
+# types so every browser/editor surface has realistic complexity. Not used by
+# any
+# automated test; those spin up their own disposable containers (see
+# ../scripts/test-engine.sh).
+#
+# Run:   docker compose -f dev/docker-compose.yml up -d
+# Stop:  docker compose -f dev/docker-compose.yml down        (keeps data)
+#        docker compose -f dev/docker-compose.yml down -v     (wipes data)
+# Reseed after changing init files:
+#        docker compose -f dev/docker-compose.yml down -v
+#        docker compose -f dev/docker-compose.yml up -d --wait
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: quarro-dev-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: quarro
+      POSTGRES_DB: quarro_demo
+    ports:
+      # Mapped to 5433 on the host: 5432 collided with a PostgreSQL already
+      # running there. Connect Quarro to port 5433, not 5432.
+      - "5433:5432"
+    volumes:
+      - ./seed/postgres:/docker-entrypoint-initdb.d:ro
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mysql:
+    image: mysql:8.4
+    container_name: quarro-dev-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: quarro
+      MYSQL_DATABASE: quarro_demo
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./seed/mysql:/docker-entrypoint-initdb.d:ro
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -uroot -pquarro"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mongo:
+    image: mongo:7
+    container_name: quarro-dev-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: quarro_demo
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./seed/mongo:/docker-entrypoint-initdb.d:ro
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval 'db.runCommand({ping:1})'"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7
+    container_name: quarro-dev-redis
+    restart: unless-stopped
+    ports:
+      # Mapped to 6380 on the host: 6379 collided with a Redis already
+      # running there. Connect Quarro to port 6380, not 6379.
+      - "6380:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Redis has no docker-entrypoint-initdb.d convention like the other three
+  # images, so seeding is a one-shot job against the running server instead
+  # of a file it loads itself. It exits once done; `docker compose up`
+  # leaves it stopped (exit 0) rather than restarting it.
+  redis-seed:
+    image: redis:7
+    container_name: quarro-dev-redis-seed
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./seed/redis/seed.sh:/seed.sh:ro
+    entrypoint: ["sh", "/seed.sh"]
+    restart: "no"
+
+volumes:
+  postgres-data:
+  mysql-data:
+  mongo-data:
+  redis-data:

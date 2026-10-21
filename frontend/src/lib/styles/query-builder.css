@@ -1,0 +1,399 @@
+/* Visual Query Builder canvas, panel, and SvelteFlow integration. */
+.visual-query-builder {
+    --diagram-edge: color-mix(in srgb, var(--text) 62%, var(--surface));
+    --diagram-edge-muted: color-mix(in srgb, var(--muted) 72%, var(--surface));
+    --diagram-minimap-node: color-mix(in srgb, var(--text) 42%, var(--accent));
+    --diagram-minimap-mask: color-mix(in srgb, var(--surface) 72%, transparent);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 1;
+    min-height: 220px;
+    max-height: calc(var(--viewport-height) * 0.6);
+    background: var(--surface);
+    isolation: isolate;
+}
+.visual-query-toolbar {
+    min-height: var(--density-toolbar-height);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--density-space-2);
+    padding: var(--density-space-2) var(--density-panel-padding);
+    border-bottom: 1px solid var(--border);
+    background: var(--subtle);
+    position: relative;
+}
+.table-picker {
+    position: absolute;
+    top: 50px;
+    left: 210px;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 220px;
+    max-height: 260px;
+    overflow: auto;
+    padding: 6px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    box-shadow: 0 8px 20px #00000018;
+}
+.table-picker button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 5px;
+    text-align: left;
+    color: var(--text);
+}
+.table-picker button:hover {
+    background: var(--raised);
+}
+.table-picker button.dragging {
+    opacity: 0.5;
+    outline: 1px dashed var(--accent);
+    outline-offset: -1px;
+}
+.query-body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+}
+.query-canvas {
+    flex: 1;
+    min-width: 0;
+    position: relative;
+    background: var(--surface);
+    contain: layout paint style;
+    transition: box-shadow 120ms ease;
+}
+.query-canvas.drag-active {
+    box-shadow: inset 0 0 0 2px var(--accent);
+}
+.query-panel {
+    flex-shrink: 0;
+    overflow-y: auto;
+    border-left: 1px solid var(--border);
+    background: var(--subtle);
+    padding: var(--density-panel-padding);
+    display: flex;
+    flex-direction: column;
+    gap: var(--density-space-4);
+}
+.query-panel-wrapper {
+    flex-shrink: 0;
+    border-left: 1px solid var(--border);
+    overflow: hidden;
+}
+.join-inspector-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+.query-panel-section {
+    margin: -6px;
+    padding: 6px;
+    border-radius: 6px;
+    transition:
+        background 120ms ease,
+        box-shadow 120ms ease;
+}
+.query-panel-section.drag-active {
+    background: var(--accent-soft);
+    box-shadow: inset 0 0 0 1px var(--accent);
+}
+.query-panel-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8462rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    margin-bottom: 8px;
+}
+.query-panel-section h3 .count {
+    color: var(--accent-text);
+}
+.query-panel-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.query-panel-heading h3 {
+    margin-bottom: 0;
+}
+.query-panel-hint {
+    font-size: 0.7692rem;
+    color: var(--muted);
+    margin: 0 0 8px;
+}
+.query-panel-list {
+    margin: 0;
+    padding-left: 16px;
+    font-size: 0.7692rem;
+    color: var(--text);
+}
+.query-column-row,
+.query-condition-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+.query-column-row .select-control,
+.query-condition-row .select-control {
+    min-width: 0;
+    flex: 1;
+}
+.query-column-row input,
+.query-condition-row input {
+    min-width: 0;
+    flex: 1;
+}
+.query-column-ref {
+    flex-shrink: 0;
+    font-family: var(--editor-font);
+    font-size: 0.7692rem;
+    color: var(--text);
+    max-width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.query-limit {
+    width: 100%;
+}
+.query-sql-preview {
+    flex-shrink: 0;
+    max-height: 160px;
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--border);
+    background: var(--subtle);
+}
+.query-sql-heading {
+    display: flex;
+    align-items: center;
+    gap: var(--density-space-2);
+    padding: var(--density-space-2) var(--density-space-3);
+    font-size: 0.7692rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+}
+.query-sql-error {
+    color: var(--error, #d64545);
+    text-transform: none;
+    font-weight: 600;
+    letter-spacing: normal;
+}
+.query-sql-preview pre {
+    margin: 0;
+    padding: 0 var(--density-space-3) var(--density-space-3);
+    overflow: auto;
+    font-family: var(--editor-font);
+    font-size: 0.8462rem;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.visual-query-builder .svelte-flow {
+    background: var(--surface);
+    --xy-edge-stroke: var(--diagram-edge-muted);
+    --xy-edge-stroke-width: 1.5;
+    --xy-edge-stroke-selected: var(--accent);
+    --xy-node-border: var(--border);
+    --xy-node-color-default: var(--text);
+    --xy-node-background-color-default: var(--surface);
+    --xy-handle-background-color-default: var(--surface);
+    --xy-handle-border-color-default: var(--diagram-edge);
+    --xy-controls-button-background-color: transparent;
+    --xy-controls-button-background-color-hover: transparent;
+    --xy-controls-button-border-color: transparent;
+    --xy-controls-button-color: var(--muted);
+    --xy-controls-button-color-hover: var(--accent-text);
+    --xy-controls-box-shadow: none;
+}
+.visual-query-builder .svelte-flow__controls {
+    display: flex;
+    gap: var(--density-space-1);
+    padding: var(--density-space-1);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--surface);
+}
+.visual-query-builder .svelte-flow__minimap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    pointer-events: none;
+}
+.visual-query-builder .svelte-flow__edge-path {
+    stroke: var(--diagram-edge-muted);
+    stroke-width: 1.5;
+}
+.visual-query-builder .svelte-flow__edge.suggested .svelte-flow__edge-path {
+    stroke: var(--muted);
+    opacity: 0.7;
+}
+.visual-query-builder .svelte-flow__edge-label {
+    color: var(--text);
+    background: var(--raised);
+    border: 1px solid var(--diagram-edge);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.query-node {
+    width: var(--density-query-node-width);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    box-shadow:
+        0 1px 0 var(--border),
+        0 8px 20px #00000012;
+    overflow: hidden;
+    color: var(--text);
+}
+.query-node.selected {
+    border-color: var(--accent);
+    box-shadow:
+        0 0 0 1px var(--accent),
+        0 10px 22px #00000018;
+}
+.query-node header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--density-space-2);
+    padding: var(--density-space-2) var(--density-space-3);
+    background: var(--subtle);
+    border-bottom: 1px solid var(--border);
+}
+.query-node header span {
+    display: block;
+    color: var(--muted);
+    font-size: 0.6923rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+.query-node header strong {
+    display: block;
+    margin-top: 3px;
+    font-size: 0.9231rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 190px;
+}
+.query-node-columns {
+    max-height: 240px;
+    overflow: auto;
+    scrollbar-width: thin;
+}
+.query-column {
+    position: relative;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 18px 26px minmax(0, 1fr) 58px;
+    align-items: center;
+    gap: var(--density-space-2);
+    min-height: var(--density-query-column-height);
+    padding: var(--density-space-2) var(--density-space-3);
+    border-bottom: 1px solid var(--border-soft);
+    font-size: 0.8462rem;
+    color: var(--text);
+}
+.query-column:hover {
+    background: var(--raised);
+}
+.query-column.row-selected {
+    background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+}
+.query-column.dragging {
+    opacity: 0.5;
+    outline: 1px dashed var(--accent);
+    outline-offset: -1px;
+}
+.query-column .query-handle {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1.5px solid var(--diagram-edge);
+    opacity: 0;
+    transition:
+        opacity 120ms ease,
+        background 120ms ease,
+        border-color 120ms ease,
+        transform 120ms ease;
+}
+.query-column .svelte-flow__handle-left.query-handle {
+    left: 5px;
+}
+.query-column .svelte-flow__handle-right.query-handle {
+    right: 5px;
+}
+.query-column:hover .query-handle,
+.query-column.row-selected .query-handle,
+.query-column .query-handle:hover,
+.query-column .query-handle.connectingfrom,
+.query-column .query-handle.connectingto,
+.query-column .query-handle.valid {
+    opacity: 1;
+}
+.query-column .query-handle:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+.query-column .svelte-flow__handle-left.query-handle:hover {
+    transform: translate(-50%, -50%) scale(1.3);
+}
+.query-column .svelte-flow__handle-right.query-handle:hover {
+    transform: translate(50%, -50%) scale(1.3);
+}
+.query-node footer {
+    display: flex;
+    align-items: center;
+    gap: var(--density-space-2);
+    padding: var(--density-space-2) var(--density-space-3);
+    background: var(--subtle);
+    border-top: 1px solid var(--border);
+}
+.query-node footer button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    min-height: 24px;
+    padding: 3px 7px;
+    color: var(--text);
+    background: var(--surface);
+    font-size: 0.7692rem;
+    font-weight: 700;
+}
+.query-node footer button:hover {
+    background: var(--raised);
+}
+/* See diagram.css — same reasoning, blend Svelte Flow's attribution into
+   the theme instead of hiding it (removal needs their Pro plan). */
+.visual-query-builder .svelte-flow__attribution {
+    --xy-attribution-background-color: transparent;
+    padding: 3px 8px;
+    opacity: 0.5;
+}
+.visual-query-builder .svelte-flow__attribution a {
+    color: var(--muted);
+    font-size: 9px;
+}

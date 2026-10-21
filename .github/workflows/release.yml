@@ -1,0 +1,255 @@
+# Builds Quarro's unsigned release packages on each OS and, for a v* tag,
+# attaches them with SHA256SUMS to a draft GitHub release.
+#
+# Nothing here needs secrets or certificates: releases are unsigned (macOS
+# gets the free ad-hoc signature from darwin:create:app:bundle).
+name: Release packages
+
+on:
+  push:
+    tags: ["v*"]
+  pull_request:
+    paths:
+      - ".github/workflows/release.yml"
+      - "build/**"
+      - "main.go"
+      - "menus_*.go"
+      - "Taskfile.yml"
+      - "go.mod"
+      - "frontend/package.json"
+      - "frontend/package-lock.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # Keep in step with github.com/wailsapp/wails/v3 in go.mod.
+  WAILS_VERSION: v3.0.0-beta.22
+  NODE_VERSION: "24"
+
+jobs:
+  version:
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.read.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read info.version from build/config.yml
+        id: read
+        run: |
+          version=$(sed -nE 's/^  version: "([^"]+)".*/\1/p' build/config.yml)
+          if [ -z "$version" ]; then
+            echo "::error file=build/config.yml::no info.version found"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Tag matches the version
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          VERSION: ${{ steps.read.outputs.version }}
+        run: |
+          if [ "$GITHUB_REF_NAME" != "v$VERSION" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match build/config.yml version $VERSION (run scripts/bump-version.sh first)"
+            exit 1
+          fi
+
+  linux:
+    needs: version
+    runs-on: ubuntu-24.04
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      # nfpm.yaml fills the package Maintainer from these.
+      GIT_COMMITTER_NAME: Quarro
+      GIT_COMMITTER_EMAIL: ${{ github.repository_owner }}@users.noreply.github.com
+      # linuxdeploy is itself an AppImage; runners have no FUSE.
+      APPIMAGE_EXTRACT_AND_RUN: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install GTK4 / WebKitGTK 6.0 build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential pkg-config libgtk-4-dev libwebkitgtk-6.0-dev file rpm
+      - name: Install wails3
+        run: go install "github.com/wailsapp/wails/v3/cmd/wails3@$WAILS_VERSION"
+      - name: Build packages
+        run: |
+          wails3 task linux:create:deb
+          wails3 task linux:create:rpm
+          wails3 task linux:create:appimage
+      - name: Check the build is a prod build
+        run: test "$(cat frontend/dist/app-stage.json)" = '"prod"'
+      # Outputs are captured before grepping: under pipefail, `cmd | grep -q`
+      # can fail when grep exits early and cmd gets SIGPIPE.
+      - name: Check package metadata
+        run: |
+          dpkg-deb --field bin/quarro.deb Package Version Depends
+          grep -q './usr/local/bin/quarro$' <<< "$(dpkg-deb --contents bin/quarro.deb)"
+          rpm -qp --queryformat '%{NAME} %{VERSION}\n' bin/quarro.rpm
+          grep -q webkitgtk6.0 <<< "$(rpm -qpR bin/quarro.rpm)"
+          grep -q 'ELF 64-bit' <<< "$(file bin/quarro-x86_64.AppImage)"
+      - name: Name artifacts
+        run: |
+          mkdir dist
+          mv bin/quarro-x86_64.AppImage "dist/Quarro-$VERSION-x86_64.AppImage"
+          mv bin/quarro.deb "dist/quarro_${VERSION}_amd64.deb"
+          mv bin/quarro.rpm "dist/quarro-$VERSION.x86_64.rpm"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: quarro-linux
+          path: dist/*
+          if-no-files-found: error
+
+  macos:
+    needs: version
+    runs-on: macos-14
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install wails3
+        run: go install "github.com/wailsapp/wails/v3/cmd/wails3@$WAILS_VERSION"
+      - name: Build universal .app and .dmg
+        run: wails3 task darwin:package:dmg:universal
+      - name: Check the build is a prod build
+        run: test "$(cat frontend/dist/app-stage.json)" = '"prod"'
+      # Apple Silicon refuses to run a binary with no signature at all; the
+      # ad-hoc one from create:app:bundle must be present and intact, or users
+      # get "damaged and can't be opened" instead of the usual unsigned-app
+      # warning.
+      - name: Check universal binary and ad-hoc signature
+        run: |
+          archs=$(lipo -archs bin/Quarro.app/Contents/MacOS/quarro)
+          echo "architectures: $archs"
+          [[ "$archs" == *x86_64* && "$archs" == *arm64* ]]
+          codesign --verify --deep --strict --verbose=2 bin/Quarro.app
+          grep -q 'Signature=adhoc' <<< "$(codesign -dv bin/Quarro.app 2>&1)"
+          plutil -extract CFBundleShortVersionString raw bin/Quarro.app/Contents/Info.plist
+          hdiutil verify bin/Quarro.dmg
+      - name: Name artifacts
+        run: |
+          mkdir dist
+          mv bin/Quarro.dmg "dist/Quarro-$VERSION-universal.dmg"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: quarro-macos
+          path: dist/*
+          if-no-files-found: error
+
+  windows:
+    needs: version
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install wails3
+        run: go install "github.com/wailsapp/wails/v3/cmd/wails3@$WAILS_VERSION"
+      - name: Ensure NSIS is available
+        run: |
+          if ! command -v makensis >/dev/null 2>&1; then
+            [ -x "/c/Program Files (x86)/NSIS/makensis.exe" ] || choco install nsis -y --no-progress
+            echo "C:\\Program Files (x86)\\NSIS" >> "$GITHUB_PATH"
+          fi
+      # Per-user install: no admin rights, so no UAC "Unknown publisher" prompt
+      # for the unsigned installer.
+      - name: Build NSIS installer
+        run: wails3 task windows:create:nsis:installer INSTALL_SCOPE=user
+      - name: Check the build is a prod build
+        run: test "$(cat frontend/dist/app-stage.json)" = '"prod"'
+      - name: Name artifacts
+        run: |
+          mkdir dist
+          mv bin/quarro-amd64-installer.exe "dist/Quarro-$VERSION-amd64-setup.exe"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: quarro-windows
+          path: dist/*
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [version, linux, macos, windows]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: quarro-*
+          merge-multiple: true
+          path: dist
+      # Version-free copies give each platform a permanent URL,
+      # https://github.com/<repo>/releases/latest/download/<name>, which the
+      # website's download buttons link to (quarro-site src/lib/links.ts).
+      # Keep these names in step with that file.
+      - name: Stable download names
+        working-directory: dist
+        run: |
+          cp "Quarro-$VERSION-universal.dmg" Quarro-universal.dmg
+          cp "Quarro-$VERSION-amd64-setup.exe" Quarro-amd64-setup.exe
+          cp "Quarro-$VERSION-x86_64.AppImage" Quarro-x86_64.AppImage
+          cp "quarro_${VERSION}_amd64.deb" quarro_amd64.deb
+          cp "quarro-$VERSION.x86_64.rpm" quarro.x86_64.rpm
+      - name: Checksums
+        working-directory: dist
+        run: |
+          sha256sum -- * > SHA256SUMS
+          cat SHA256SUMS
+          test "$(wc -l < SHA256SUMS)" -eq 10
+      - name: Release notes
+        run: |
+          {
+            echo "## Quarro $VERSION"
+            echo
+            echo "_Describe the changes in this release before publishing._"
+            echo
+            sed -n '/<!-- release-notes:start -->/,/<!-- release-notes:end -->/p' docs/install.md |
+              sed "s/<version>/$VERSION/g"
+          } > notes.md
+      - name: Create draft release
+        run: |
+          prerelease=()
+          if [[ "$VERSION" == *-* ]]; then prerelease=(--prerelease); fi
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --draft "${prerelease[@]}" \
+            --title "Quarro $VERSION" \
+            --notes-file notes.md

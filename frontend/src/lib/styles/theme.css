@@ -1,0 +1,656 @@
+@font-face {
+    font-family: Inter;
+    src: url('/Inter-Medium.ttf') format('truetype');
+    font-weight: 100 900;
+    font-display: swap;
+}
+
+:root {
+    --app-zoom: 1;
+    --viewport-height: calc(100vh / var(--app-zoom));
+    --viewport-width: calc(100vw / var(--app-zoom));
+    font-family: var(--ui-font, Inter, sans-serif);
+    font-size: var(--ui-size, 13px);
+    color-scheme: light;
+    --bg: #f4f5f5;
+    --surface: #ffffff;
+    --raised: #e6e8e8;
+    --subtle: #f0f1f1;
+    --card: #e6e8e8;
+    --border: #d7dada;
+    --border-soft: #e5e7e7;
+    --text: #171818;
+    --muted: #6f7373;
+    --accent: #2f3434;
+    --on-accent: #ffffff;
+    --accent-text: #171818;
+    --accent-soft: #e2e4e4;
+    --success: #546f67;
+    --success-bg: #dde6e3;
+    --warning: #8a7444;
+    --warning-bg: #e9e2d0;
+    --error: #8f5e5b;
+    --focus: #2f3434;
+    --selection: #dfe2e2;
+    --syntax-keyword: #5e6262;
+    --syntax-comment: #9a9e9e;
+    --syntax-number: #4f5555;
+    --shadow: 0 16px 60px #17181826;
+    --control-height: 32px;
+    --control-padding-y: 6px;
+    --control-padding-x: 10px;
+    --button-padding-y: 5px;
+    --button-padding-x: 10px;
+    --button-gap: 7px;
+    --density-space-1: 4px;
+    --density-space-2: 8px;
+    --density-space-3: 12px;
+    --density-space-4: 16px;
+    --density-space-5: 24px;
+    --density-document-bar-height: 43px;
+    --density-toolbar-height: 52px;
+    --density-query-toolbar-height: 54px;
+    --density-status-height: 29px;
+    --density-sidebar-heading-height: 49px;
+    --density-grid-header-height: 36px;
+    --density-panel-padding: 16px;
+    --density-page-padding: 24px;
+    --density-editor-padding-top: 20px;
+    --density-editor-padding-bottom: 12px;
+    --density-editor-line-padding: 20px;
+    --density-editor-gutter-width: 48px;
+    --density-query-node-width: 260px;
+    --density-query-column-height: 28px;
+    --density-flow-control-size: 28px;
+    --header-height: 50px;
+    --header-control-size: 36px;
+    --header-icon-size: 22px;
+    --header-tab-height: 36px;
+    --header-tab-max-width: 240px;
+    --header-tab-close-width: 22px;
+    --header-tab-close-height: 24px;
+    --header-tab-radius: 7px;
+    --header-brand-radius: 9px;
+    --header-gap: 6px;
+    --header-padding: 10px;
+    --ui-font: Inter, sans-serif;
+    --ui-size: 13px;
+    --editor-font: monospace;
+    --editor-size: 14px;
+    --editor-line-height: 1.65;
+    --grid-font: Inter, sans-serif;
+    --grid-size: 13px;
+}
+
+:root[data-theme='monochrome'] {
+    color-scheme: dark;
+    --bg: #0d0e0e;
+    --surface: #151616;
+    --raised: #222424;
+    --subtle: #111212;
+    --card: #191a1a;
+    --border: #303333;
+    --border-soft: #232525;
+    --text: #f1f2f2;
+    --muted: #a1a5a5;
+    --accent: #d7dada;
+    --on-accent: #111212;
+    --accent-text: #e5e7e7;
+    --accent-soft: #282b2b;
+    --success: #8fa59e;
+    --success-bg: #182321;
+    --warning: #c9b37e;
+    --warning-bg: #2a2418;
+    --error: #c07b78;
+    --focus: #d7dada;
+    --selection: #333737;
+    --syntax-keyword: #b9bcbc;
+    --syntax-comment: #6a6e6e;
+    --syntax-number: #d0d3d3;
+    --shadow: 0 16px 60px #000b;
+}
+
+:root[data-density='compact'] {
+    --control-height: 28px;
+    --control-padding-y: 4px;
+    --control-padding-x: 8px;
+    --button-padding-y: 4px;
+    --button-padding-x: 8px;
+    --button-gap: 5px;
+    --density-space-1: 2px;
+    --density-space-2: 5px;
+    --density-space-3: 8px;
+    --density-space-4: 11px;
+    --density-space-5: 16px;
+    --density-document-bar-height: 35px;
+    --density-toolbar-height: 42px;
+    --density-query-toolbar-height: 44px;
+    --density-status-height: 24px;
+    --density-sidebar-heading-height: 40px;
+    --density-grid-header-height: 30px;
+    --density-panel-padding: 10px;
+    --density-page-padding: 16px;
+    --density-editor-padding-top: 12px;
+    --density-editor-padding-bottom: 8px;
+    --density-editor-line-padding: 12px;
+    --density-editor-gutter-width: 40px;
+    --density-query-node-width: 236px;
+    --density-query-column-height: 24px;
+    --density-flow-control-size: 24px;
+    --header-height: 44px;
+    --header-control-size: 32px;
+    --header-icon-size: 20px;
+    --header-tab-height: 32px;
+    --header-tab-max-width: 220px;
+    --header-tab-close-width: 20px;
+    --header-tab-close-height: 22px;
+    --header-tab-radius: 6px;
+    --header-brand-radius: 8px;
+    --header-gap: 4px;
+    --header-padding: 8px;
+}
+
+:root[data-density='compact'] .button.icon-only {
+    width: 28px;
+    min-height: 28px;
+    padding: 4px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+}
+
+html {
+    background: var(--bg) !important;
+}
+
+body {
+    color: var(--text);
+    background: var(--bg);
+    overflow: hidden;
+}
+
+/* Zoom uses the native `zoom` property, not `transform: scale`: transform
+   only rasterizes and rescales the already-painted pixels, which blurs text
+   and icon edges at any non-100% factor; `zoom` re-lays-out text at the
+   correct pixel density and stays crisp.
+
+   #app's own box is sized as a plain 100%/100% of its (unzoomed) parent
+   `body`, never with vw/vh or any length that depends on `zoom` scaling it
+   back up to fill the screen — that dependency is exactly what clipped the
+   bottom/right edge in WebKitGTK (Chromium re-expands a zoomed element's own
+   box to match its real footprint; WebKitGTK does not, so a pre-shrunk
+   local size like `100vw / zoom` stayed shrunk on screen). Percentage-of-
+   parent sizing has nothing to do with zoom, so it resolves the same,
+   unambiguously, in every engine.
+
+   Inside #app, `vh`/`vw` still always resolve against the real, un-zoomed
+   viewport regardless of ancestor zoom — that part is genuinely consistent
+   across engines. Anything below #app that needs "a fraction of the real
+   screen" (a dialog's max-height, the editor pane's max-height) still goes
+   through --viewport-width/height (100vw/100vh divided by zoom, defined
+   above), because a *descendant*'s own length values are interpreted in
+   #app's zoomed-local coordinate space and do need that division to render
+   at the intended physical size. */
+#app {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    zoom: var(--app-zoom);
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+button {
+    color: inherit;
+    cursor: pointer;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.42;
+}
+
+button,
+a,
+input,
+select,
+summary {
+    -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible,
+input:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+}
+
+button {
+    border: 0;
+    background: none;
+}
+
+input,
+select {
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    min-height: var(--control-height);
+    padding: var(--control-padding-y) var(--control-padding-x);
+    min-width: 0;
+}
+
+input::placeholder {
+    color: var(--muted);
+    opacity: 0.9;
+}
+
+input[type='number'] {
+    font-variant-numeric: tabular-nums;
+}
+
+h1,
+h2,
+h3,
+p {
+    margin: 0;
+}
+
+h1 {
+    font-size: 1.8462rem;
+    font-weight: 600;
+    letter-spacing: -0.8px;
+}
+
+h2 {
+    font-size: 1.5385rem;
+    letter-spacing: -0.5px;
+    font-weight: 600;
+}
+
+h3 {
+    font-size: 1.0769rem;
+    font-weight: 600;
+}
+
+small {
+    font-size: 0.8462rem;
+}
+
+svg {
+    flex-shrink: 0;
+    vertical-align: middle;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+kbd {
+    font-family: inherit;
+    font-size: 0.7692rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 4px;
+    white-space: nowrap;
+    color: var(--muted);
+}
+
+[hidden] {
+    display: none !important;
+}
+
+::selection {
+    background: var(--selection);
+}
+
+.muted {
+    color: var(--muted);
+    line-height: 1.6;
+}
+
+.eyebrow {
+    font-size: 0.7692rem;
+    font-weight: 600;
+    letter-spacing: 1.4px;
+    color: var(--muted);
+}
+
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--button-gap);
+    min-height: var(--control-height);
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: var(--button-padding-y) var(--button-padding-x);
+    white-space: nowrap;
+    line-height: 1.2;
+    font-size: 0.9231rem;
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+.button:hover:not(:disabled),
+.button.active {
+    background: var(--raised);
+}
+
+.button.icon-only {
+    width: 30px;
+    min-height: 30px;
+    padding: 6px;
+    color: var(--muted);
+}
+
+.button.outline {
+    border-color: var(--border);
+    background: var(--surface);
+}
+
+.button.primary {
+    background: var(--accent);
+    color: var(--on-accent);
+    border-color: var(--accent-text);
+}
+
+.button.primary:hover:not(:disabled) {
+    background: var(--accent-text);
+}
+
+.button.primary kbd {
+    border-color: #1e1e1e33;
+    color: var(--on-accent);
+    margin-left: 6px;
+}
+
+.button.danger {
+    color: var(--error);
+}
+
+.button.active {
+    color: var(--accent-text);
+}
+
+.text-button {
+    color: var(--accent-text);
+    padding: 6px 0;
+}
+
+.count {
+    font-size: 0.7692rem;
+    line-height: 17px;
+    min-width: 20px;
+    text-align: center;
+    border-radius: 4px;
+    background: var(--raised);
+    color: var(--muted);
+    padding: 0 4px;
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--success);
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.status-dot.offline {
+    background: var(--muted);
+}
+
+.status-dot.connecting {
+    background: var(--accent);
+}
+
+.environment {
+    font-size: 0.6923rem;
+    line-height: 18px;
+    padding: 0 6px;
+    white-space: nowrap;
+    border-radius: 4px;
+    background: var(--success-bg);
+    color: var(--success);
+}
+
+.environment.stage {
+    background: var(--accent-soft);
+    color: var(--accent-text);
+}
+
+.preview-badge {
+    font-size: 0.6923rem;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    line-height: 20px;
+    background: var(--raised);
+    border: 1px solid var(--border-soft);
+    padding: 0 6px;
+    border-radius: 4px;
+    color: var(--muted);
+}
+
+.search-field {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0 9px;
+    color: var(--muted);
+    background: var(--surface);
+    min-width: 0;
+}
+
+.search-field:focus-within {
+    border-color: var(--focus);
+}
+
+.search-field input {
+    width: 100%;
+    min-height: 30px;
+    padding: 6px 0;
+    border: 0;
+    background: transparent;
+    outline: none;
+}
+
+.search-field kbd {
+    font-size: 0.7692rem;
+}
+
+.dropdown {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.dropdown summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 5px;
+    cursor: pointer;
+    color: var(--muted);
+}
+
+.dropdown summary::-webkit-details-marker {
+    display: none;
+}
+
+.dropdown summary:hover,
+.dropdown[open] summary {
+    background: var(--raised);
+}
+
+.menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    width: 230px;
+    max-height: 360px;
+    overflow: auto;
+    padding: 5px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    z-index: 50;
+}
+
+.menu button {
+    width: 100%;
+    padding: 9px 10px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+    border-radius: 4px;
+    font-size: 0.9231rem;
+}
+
+.menu button:hover {
+    background: var(--raised);
+}
+
+.menu hr {
+    border: 0;
+    border-top: 1px solid var(--border-soft);
+}
+
+.error-text {
+    color: var(--error);
+}
+
+.empty-state {
+    flex: 1;
+    min-height: 170px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 14px;
+    padding: 30px;
+    color: var(--muted);
+}
+
+.empty-state h2,
+.empty-state h3,
+.empty-state h1 {
+    color: var(--text);
+}
+
+.empty-state p {
+    max-width: 400px;
+    line-height: 1.7;
+}
+
+.empty-icon {
+    width: 64px;
+    height: 64px;
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    background: var(--subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent-text);
+    margin-bottom: 4px;
+}
+
+.resize-handle {
+    background: transparent;
+    position: relative;
+    touch-action: none;
+    z-index: 5;
+    flex-shrink: 0;
+}
+
+.resize-handle:after {
+    content: '';
+    position: absolute;
+    background: var(--border-soft);
+}
+
+.resize-handle.vertical {
+    width: 5px;
+    height: 100%;
+    cursor: col-resize;
+}
+
+.resize-handle.vertical:after {
+    width: 1px;
+    height: 100%;
+    left: 2px;
+}
+
+.resize-handle.horizontal {
+    height: 5px;
+    width: 100%;
+    cursor: row-resize;
+}
+
+.resize-handle.horizontal:after {
+    height: 1px;
+    width: 100%;
+    top: 2px;
+}
+
+.resize-handle:hover,
+.resize-handle:focus-visible {
+    background: var(--accent-soft);
+}
+
+.resize-handle:hover:after {
+    background: var(--accent);
+}
+
+.rotate {
+    transform: rotate(90deg);
+}
+
+.inline-note {
+    padding: 14px;
+    border: 1px solid var(--border-soft);
+    background: var(--subtle);
+    border-radius: 7px;
+    color: var(--muted);
+    font-size: 0.9231rem;
+    line-height: 1.7;
+    display: flex;
+    gap: 10px;
+}
+
+.inline-note svg {
+    margin-top: 3px;
+}

@@ -1,0 +1,51 @@
+{
+    "name": "frontend",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "dev:test": "vite --mode test",
+        "build:dev": "vite build --minify false --mode development",
+        "build:test": "vite build --minify false --mode test",
+        "build": "vite build --mode production",
+        "preview": "vite preview",
+        "check": "svelte-check --tsconfig ./tsconfig.json",
+        "test:server": "node scripts/test-server.mjs",
+        "test:unit": "vitest run src/lib/features/charts/aggregate.test.ts src/lib/features/diagram/export.test.ts src/lib/features/explain/layout.test.ts src/lib/features/explain/reveal.test.ts src/lib/features/keyvalue/pages.test.ts src/lib/features/editor/redisCommand.test.ts src/lib/state/updates.test.ts",
+        "test": "playwright test",
+        "test:marketing": "playwright test --config playwright.marketing.config.ts",
+        "format": "oxfmt .",
+        "format:check": "oxfmt --check ."
+    },
+    "dependencies": {
+        "@codemirror/autocomplete": "6.20.3",
+        "@codemirror/commands": "6.11.0",
+        "@codemirror/lang-json": "6.0.2",
+        "@codemirror/lang-sql": "6.10.0",
+        "@codemirror/language": "6.12.4",
+        "@codemirror/lint": "6.9.7",
+        "@codemirror/search": "6.7.2",
+        "@codemirror/state": "6.7.4",
+        "@codemirror/view": "6.43.11",
+        "@lezer/common": "1.5.2",
+        "@lezer/highlight": "1.2.3",
+        "@lucide/svelte": "1.46.0",
+        "@wailsio/runtime": "3.0.0-beta.22",
+        "@xyflow/svelte": "^1.6.6",
+        "echarts": "^6.1.0",
+        "sql-formatter": "15.8.2"
+    },
+    "devDependencies": {
+        "@playwright/test": "1.63.0",
+        "@sveltejs/vite-plugin-svelte": "7.3.0",
+        "@tsconfig/svelte": "5.0.8",
+        "oxfmt": "^0.68.0",
+        "svelte": "5.57.0",
+        "svelte-check": "4.7.6",
+        "tslib": "2.8.1",
+        "typescript": "5.9.3",
+        "vite": "8.3.0",
+        "vitest": "^5.0.1"
+    }
+}

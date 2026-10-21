@@ -1,0 +1,267 @@
+/* Application frame and session navigation. */
+.app-shell {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--surface);
+}
+.session-bar {
+    height: var(--header-height);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--header-gap);
+    padding: 0 var(--header-padding);
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    z-index: 20;
+}
+/* The session bar doubles as the title bar (Linux "Quarro" title bar,
+   Windows, macOS). Wails reads --wails-draggable, and since custom
+   properties inherit, every interactive child opts back out. On Windows,
+   WebView2 also reads app-region (main.go enables NonClientRegionSupport),
+   which hands the bar to Windows as a native caption: native drag and
+   snapping, double-click maximise, and the right-click window menu.
+   WebKit ignores app-region; --wails-draggable remains the fallback. */
+.session-bar.titlebar {
+    --wails-draggable: drag;
+    app-region: drag;
+}
+.session-bar.titlebar :is(button, a, input, select, summary, label, .menu) {
+    --wails-draggable: no-drag;
+    app-region: no-drag;
+}
+/* Windows caption buttons, sized and coloured like the native ones: 46px
+   wide, full bar height, square, Segoe glyphs, and the system red on close.
+   Native buttons don't scale with app zoom, so neither do these. */
+.session-bar.caption-buttons {
+    padding-right: 0;
+}
+.window-controls.caption-buttons {
+    align-self: stretch;
+    align-items: stretch;
+    gap: 0;
+    margin: 0 0 0 4px;
+}
+.caption-button {
+    width: calc(46px / var(--app-zoom));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--text);
+    font-family: 'Segoe Fluent Icons', 'Segoe MDL2 Assets', sans-serif;
+    font-size: calc(10px / var(--app-zoom));
+}
+.caption-button:hover {
+    background: var(--raised);
+}
+.caption-button:active {
+    background: var(--border);
+}
+.caption-button.close:hover,
+.caption-button.close:active {
+    background: #c42b1c;
+    color: #ffffff;
+}
+.caption-button.close:active {
+    opacity: 0.9;
+}
+/* macOS traffic lights sit over the bar's leading edge (they end ~72px in)
+   and are centred in a ~52px native title area. Both are fixed screen
+   pixels, so divide by the app zoom that scales everything else. */
+.session-bar.traffic-lights {
+    padding-left: calc(80px / var(--app-zoom));
+    height: max(var(--header-height), calc(52px / var(--app-zoom)));
+}
+.window-controls {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-right: -6px;
+}
+.brand {
+    width: var(--header-control-size);
+    height: var(--header-control-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin-right: calc(var(--header-gap) - 1px);
+    border-radius: var(--header-brand-radius);
+    flex-shrink: 0;
+}
+.brand:hover {
+    background: var(--raised);
+}
+.brand-icon {
+    width: var(--header-icon-size);
+    height: var(--header-icon-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.brand-mark {
+    width: 100%;
+    height: 100%;
+}
+/* Light theme uses the dark badge and dark theme uses the light badge, so the
+   mark contrasts with the surrounding chrome instead of blending into it. */
+.brand-mark-light-asset {
+    display: none;
+}
+:root[data-theme='monochrome'] .brand-mark-dark-asset {
+    display: none;
+}
+:root[data-theme='monochrome'] .brand-mark-light-asset {
+    display: block;
+}
+.session-tabs {
+    display: flex;
+    gap: calc(var(--header-gap) - 2px);
+    height: var(--header-tab-height);
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.session-tab {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    border: 1px solid transparent;
+    border-radius: var(--header-tab-radius);
+    max-width: var(--header-tab-max-width);
+    color: var(--muted);
+    padding-right: 3px;
+}
+.session-tab:hover {
+    background: var(--raised);
+}
+.session-tab.selected {
+    background: var(--surface);
+    border-color: var(--border);
+    box-shadow: 0 1px 2px #00000008;
+    color: var(--text);
+}
+.session-select {
+    padding: 0 calc(var(--header-gap) + 2px) 0 calc(var(--header-gap) + 4px);
+    display: flex;
+    align-items: center;
+    gap: calc(var(--header-gap) + 2px);
+    min-width: 0;
+    height: 100%;
+    font-size: 0.9231rem;
+}
+.session-tab .button {
+    width: var(--header-tab-close-width);
+    min-height: var(--header-tab-close-height);
+    padding: 3px;
+}
+.session-tab:not(.selected):not(:hover) .button {
+    opacity: 0;
+}
+.session-select .status-dot {
+    margin-left: 2px;
+    width: 5px;
+    height: 5px;
+}
+.session-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: calc(var(--header-gap) - 2px);
+    padding-left: var(--header-gap);
+}
+.engine-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.postgres {
+    color: #648ab0;
+}
+.sqlite {
+    color: #9b84bc;
+}
+.mysql {
+    color: #ae8849;
+}
+.sessions-host,
+.session-host {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+.workspace-layout {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+}
+.sidebar-wrapper {
+    flex-shrink: 0;
+    background: var(--subtle);
+}
+.sidebar-resizer {
+    flex-shrink: 0;
+    margin-left: -2px;
+    background: var(--subtle);
+}
+.sidebar-hidden .sidebar-wrapper,
+.sidebar-hidden .sidebar-resizer {
+    display: none;
+}
+.workspace-main {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+.status-bar {
+    height: var(--density-status-height);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--density-panel-padding);
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--muted);
+    font-size: 0.7692rem;
+    gap: var(--density-space-3);
+}
+.status-bar > span {
+    display: flex;
+    align-items: center;
+    gap: var(--density-space-2);
+}
+.status-bar button {
+    font-size: 0.7692rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--density-space-2);
+}
+.status-separator {
+    color: var(--border);
+    margin: 0 4px;
+}
+.status-bar .status-center {
+    margin-right: auto;
+    margin-left: 24px;
+}
+.status-bar .read-only-session {
+    color: var(--warning, var(--accent-text));
+    font-weight: 650;
+}
+.status-bar kbd {
+    font-size: 0.65rem;
+    color: var(--muted);
+}
+.background-jobs-hint {
+    color: var(--muted);
+}

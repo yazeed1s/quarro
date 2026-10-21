@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <link rel="icon" href="../brand/web/light/favicon.ico" sizes="16x16 32x32 48x48" media="(prefers-color-scheme: dark)" />
+        <link rel="icon" href="../brand/web/dark/favicon.ico" sizes="16x16 32x32 48x48" media="(prefers-color-scheme: light)" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+        <script>
+            try {
+                const saved = JSON.parse(localStorage.getItem('quarro.%VITE_APP_STAGE%.workspace.v3') || 'null');
+                const mode = saved?.preferences?.theme || 'monochrome';
+                const darkThemes = new Set(['dark', 'night-court', 'monochrome']);
+                const themeBackgrounds = {
+                    light: '#efe9e3',
+                    dark: '#0f1011',
+                    'monochrome-light': '#f4f5f5',
+                    monochrome: '#0d0e0e',
+                    'night-court-light': '#f1eef7',
+                    'night-court': '#0d0d14',
+                };
+                const systemDark = matchMedia('(prefers-color-scheme: dark)').matches;
+                const resolved = mode === 'system' ? (systemDark ? 'dark' : 'light') : mode;
+                const validTheme = Object.hasOwn(themeBackgrounds, resolved);
+                document.documentElement.dataset.theme = validTheme ? resolved : darkThemes.has(resolved) || (mode === 'system' && systemDark) ? 'dark' : 'light';
+                document.documentElement.style.background = themeBackgrounds[document.documentElement.dataset.theme] || themeBackgrounds.light;
+            } catch {}
+        </script>
+        <title>Quarro</title>
+    </head>
+    <body>
+        <div id="app"></div>
+        <script type="module" src="/src/main.ts"></script>
+    </body>
+</html>

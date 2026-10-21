@@ -1,0 +1,15 @@
+{
+	"fixed": {
+		"file_version": "0.0.1"
+	},
+	"info": {
+		"0000": {
+			"ProductVersion": "0.0.1",
+			"CompanyName": "Quarro",
+			"FileDescription": "A fast, native database client",
+			"LegalCopyright": "(c) 2026, Quarro",
+			"ProductName": "Quarro",
+			"Comments": "Quarro desktop database client"
+		}
+	}
+}

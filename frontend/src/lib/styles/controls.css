@@ -1,0 +1,231 @@
+/* Shared fake controls: no visible browser-native widgets. */
+.select-control,
+.input-control {
+    --control-bg: var(--surface);
+    --control-bg-hover: var(--raised);
+    --control-border: var(--border);
+    --control-border-hot: color-mix(in srgb, var(--accent) 48%, var(--border));
+    --control-fill: var(--accent);
+    --control-fill-soft: var(--accent-soft);
+    --control-label: var(--muted);
+    position: relative;
+    min-width: 0;
+    font-size: 0.8462rem;
+}
+.control-label {
+    color: var(--control-label);
+}
+.select-control {
+    display: grid;
+    gap: var(--density-space-2);
+}
+.select-trigger {
+    width: 100%;
+    min-height: var(--control-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--density-space-2);
+    padding: 0 var(--density-space-2) 0 var(--density-space-3);
+    border: 1px solid var(--control-border);
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--control-bg) 86%, var(--subtle));
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+}
+.select-trigger:hover:not(:disabled),
+.select-control.open .select-trigger {
+    border-color: var(--control-border-hot);
+    background: var(--control-bg);
+}
+.select-trigger:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 1px;
+}
+.select-trigger span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.select-trigger svg {
+    flex-shrink: 0;
+    color: var(--muted);
+}
+.select-menu {
+    position: fixed;
+    z-index: 90;
+    max-height: 220px;
+    overflow: auto;
+    padding: var(--density-space-1);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background: var(--surface);
+    box-shadow: 0 10px 28px #00000018;
+}
+.select-menu button {
+    width: 100%;
+    min-height: 27px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--density-space-2);
+    padding: 0 var(--density-space-2);
+    border-radius: 4px;
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+}
+.select-menu button:hover:not(:disabled),
+.select-menu button:focus-visible {
+    background: var(--raised);
+    outline: none;
+}
+.select-menu button.active {
+    background: color-mix(in srgb, var(--accent-soft) 72%, var(--surface));
+    color: var(--accent-text);
+}
+.select-menu button:disabled,
+.select-trigger:disabled,
+.select-control.disabled,
+.input-control.disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+.select-control.compact .select-trigger {
+    min-height: 30px;
+}
+.input-control.field,
+.input-control.range {
+    display: grid;
+    gap: var(--density-space-2);
+}
+.input-control.field input {
+    width: 100%;
+    min-height: var(--control-height);
+    border: 1px solid var(--control-border);
+    border-radius: 5px;
+    background: var(--control-bg);
+    color: var(--text);
+    font: inherit;
+    padding: 0 var(--density-space-3);
+}
+.input-control.field input:hover:not(:disabled),
+.input-control.field input:focus {
+    border-color: var(--control-border-hot);
+    background: var(--control-bg-hover);
+}
+.input-control.field input:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 1px;
+}
+.input-control.checkbox {
+    width: 100%;
+    min-height: 24px;
+    display: flex;
+    align-items: center;
+    gap: var(--density-space-2);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+}
+.input-control.checkbox input,
+.input-native-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+.input-check {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--surface);
+}
+.input-control.checkbox:hover:not(:disabled) .input-check,
+.input-control.checkbox:focus-visible .input-check {
+    border-color: var(--control-border-hot);
+    background: var(--raised);
+}
+.input-control.checkbox:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+}
+.input-control.checkbox.checked .input-check {
+    border-color: var(--accent);
+    background: var(--accent);
+}
+.input-control.checkbox.checked:hover:not(:disabled) .input-check,
+.input-control.checkbox.checked:focus-visible .input-check {
+    border-color: var(--accent);
+    background: var(--accent);
+}
+.input-control.checkbox.checked .input-check::after {
+    content: '';
+    width: 6px;
+    height: 3px;
+    border-left: 1.5px solid var(--on-accent);
+    border-bottom: 1.5px solid var(--on-accent);
+    transform: translateY(-1px) rotate(-45deg);
+}
+.input-control.range {
+    grid-template-columns: 92px minmax(0, 1fr) 42px;
+    align-items: center;
+    gap: 7px;
+}
+.input-range-shell {
+    min-width: 0;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+.input-range-shell:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 5px;
+}
+.input-range-track {
+    position: relative;
+    width: 100%;
+    height: 4px;
+    border: 1px solid var(--border-soft);
+    border-radius: 999px;
+    background: var(--raised);
+}
+.input-range-fill {
+    position: absolute;
+    inset: -1px auto -1px -1px;
+    border-radius: 999px 0 0 999px;
+    background: var(--accent);
+}
+.input-range-thumb {
+    position: absolute;
+    top: 50%;
+    width: 11px;
+    height: 11px;
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+    background: var(--surface);
+    box-shadow: 0 1px 2px #0002;
+    transform: translate(-50%, -50%);
+}
+.input-range-shell:hover .input-range-thumb,
+.input-range-shell:focus-visible .input-range-thumb {
+    background: var(--accent-soft);
+}
+.input-control.range output,
+.input-control.field output {
+    color: var(--text);
+    font-size: 0.7692rem;
+    text-align: right;
+}

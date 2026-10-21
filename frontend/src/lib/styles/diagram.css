@@ -1,0 +1,610 @@
+/* Schema diagram and SvelteFlow integration. */
+.schema-diagram {
+    --diagram-edge: color-mix(in srgb, var(--text) 62%, var(--surface));
+    --diagram-edge-muted: color-mix(in srgb, var(--muted) 72%, var(--surface));
+    --diagram-grid: color-mix(in srgb, var(--border) 58%, transparent);
+    --diagram-minimap-node: color-mix(in srgb, var(--text) 42%, var(--accent));
+    --diagram-minimap-mask: color-mix(in srgb, var(--surface) 72%, transparent);
+    --diagram-edge-label-bg: color-mix(in srgb, var(--raised) 94%, var(--accent) 6%);
+    --diagram-edge-label-text: var(--text);
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    isolation: isolate;
+}
+.diagram-toolbar {
+    min-height: var(--density-toolbar-height);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--density-space-2);
+    padding: var(--density-space-2) var(--density-panel-padding);
+    border-bottom: 1px solid var(--border);
+    background: var(--subtle);
+}
+.diagram-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 190px;
+}
+.diagram-title strong {
+    display: block;
+    font-size: 0.9231rem;
+    color: var(--text);
+}
+.diagram-title span {
+    display: block;
+    color: var(--muted);
+    font-size: 0.7692rem;
+    margin-top: 3px;
+}
+.diagram-search {
+    width: min(330px, 34vw);
+}
+.diagram-config-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+.diagram-config-panel {
+    position: absolute;
+    z-index: 15;
+    top: calc(100% + 8px);
+    right: 0;
+    width: min(430px, calc(var(--viewport-width) - 28px));
+    display: grid;
+    gap: var(--density-space-3);
+    padding: var(--density-space-3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow);
+}
+.diagram-config-panel::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    right: 18px;
+    width: 8px;
+    height: 8px;
+    border-top: 1px solid var(--border);
+    border-left: 1px solid var(--border);
+    background: var(--surface);
+    transform: rotate(45deg);
+}
+.diagram-config-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+.diagram-config-head strong {
+    display: block;
+    font-size: 0.9231rem;
+}
+.diagram-config-head span {
+    display: block;
+    margin-top: 3px;
+    color: var(--muted);
+    font-size: 0.7692rem;
+}
+.diagram-config-head button {
+    width: 26px;
+    height: 26px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--muted);
+    background: var(--subtle);
+}
+.diagram-config-head button:hover {
+    color: var(--text);
+    background: var(--raised);
+}
+.diagram-config-row {
+    display: grid;
+    gap: 7px;
+}
+.diagram-config-row > span {
+    color: var(--muted);
+    font-size: 0.6923rem;
+    font-weight: 750;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+.diagram-segment {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--subtle);
+}
+.diagram-segment button {
+    min-width: 0;
+    min-height: 30px;
+    padding: 5px 8px;
+    border-right: 1px solid var(--border);
+    color: var(--muted);
+    background: transparent;
+    font-size: 0.7692rem;
+    font-weight: 700;
+}
+.diagram-segment button:last-child {
+    border-right: 0;
+}
+.diagram-segment button:hover {
+    color: var(--text);
+    background: var(--raised);
+}
+.diagram-segment button.active {
+    color: var(--on-accent);
+    background: var(--accent);
+}
+.diagram-toggle-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+.diagram-toggle-grid .input-control.checkbox {
+    min-width: 0;
+    gap: 7px;
+    min-height: 32px;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--subtle);
+    color: var(--text);
+    font-size: 0.7692rem;
+    font-weight: 700;
+}
+.diagram-toggle-grid .input-control.checkbox.disabled {
+    opacity: 0.48;
+}
+.diagram-toggle-grid .input-control.checkbox span:last-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.diagram-canvas {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    position: relative;
+    background: var(--surface);
+    contain: layout paint style;
+}
+.diagram-canvas:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: -2px;
+}
+.diagram-workspace {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+}
+.schema-diagram.config-open .diagram-canvas {
+    border-right: 1px solid var(--border);
+}
+.diagram-inspector {
+    width: min(340px, 36vw);
+    min-width: 300px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    color: var(--text);
+}
+.diagram-inspector header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--density-space-3);
+    padding: var(--density-space-3) var(--density-panel-padding);
+    border-bottom: 1px solid var(--border);
+    background: var(--subtle);
+}
+.diagram-inspector h3 {
+    margin-top: 3px;
+    font-size: 1rem;
+}
+.diagram-inspector header small {
+    display: block;
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 0.7692rem;
+}
+.diagram-inspector-content {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    display: grid;
+    align-content: start;
+    gap: var(--density-space-3);
+    padding: var(--density-space-3) var(--density-panel-padding) var(--density-space-4);
+    scrollbar-width: thin;
+}
+.diagram-inspector-content section {
+    display: grid;
+    gap: var(--density-space-2);
+    padding-bottom: var(--density-space-3);
+    border-bottom: 1px solid var(--border-soft);
+}
+.diagram-inspector-content section:last-child {
+    border-bottom: 0;
+}
+.diagram-inspector-content h4 {
+    margin: 0;
+    font-size: 0.8462rem;
+    color: var(--text);
+}
+.diagram-inspector footer {
+    padding: var(--density-space-2) var(--density-panel-padding);
+    border-top: 1px solid var(--border);
+    background: var(--subtle);
+}
+.diagram-empty {
+    height: 100%;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 9px;
+    text-align: center;
+    color: var(--muted);
+}
+.schema-diagram .svelte-flow,
+.explain-canvas .svelte-flow {
+    background: var(--surface);
+    --xy-edge-stroke: var(--diagram-edge-muted);
+    --xy-edge-stroke-width: 1.5;
+    --xy-edge-stroke-selected: var(--accent);
+    --xy-node-border: var(--border);
+    --xy-node-color-default: var(--text);
+    --xy-node-background-color-default: var(--card);
+    --xy-handle-background-color-default: var(--surface);
+    --xy-handle-border-color-default: var(--diagram-edge);
+    --xy-selection-background-color: color-mix(in srgb, var(--accent) 10%, transparent);
+    --xy-selection-border: 1px solid var(--accent);
+    --xy-controls-button-background-color: transparent;
+    --xy-controls-button-background-color-hover: transparent;
+    --xy-controls-button-border-color: transparent;
+    --xy-controls-button-color: var(--muted);
+    --xy-controls-button-color-hover: var(--accent-text);
+    --xy-controls-box-shadow: none;
+    text-rendering: geometricPrecision;
+    -webkit-font-smoothing: antialiased;
+}
+.schema-diagram .svelte-flow__controls,
+.explain-canvas .svelte-flow__controls {
+    display: flex;
+    gap: var(--density-space-1);
+    padding: var(--density-space-1);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--surface);
+    box-shadow: 0 2px 3px #00000003;
+}
+.schema-diagram .svelte-flow__controls-button,
+.explain-canvas .svelte-flow__controls-button {
+    width: var(--density-flow-control-size);
+    height: var(--density-flow-control-size);
+    border-radius: 6px;
+    color: var(--muted);
+    opacity: 1;
+    transition: color 0.12s ease;
+}
+.schema-diagram .svelte-flow__controls-button:active,
+.explain-canvas .svelte-flow__controls-button:active {
+    color: var(--accent);
+}
+.schema-diagram .svelte-flow__controls-button svg,
+.explain-canvas .svelte-flow__controls-button svg {
+    fill: currentColor;
+}
+.schema-diagram .svelte-flow__controls-button:disabled,
+.explain-canvas .svelte-flow__controls-button:disabled {
+    color: var(--muted);
+    opacity: 0.4;
+}
+.schema-diagram .svelte-flow__minimap,
+.explain-canvas .svelte-flow__minimap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    pointer-events: none;
+    box-shadow:
+        0 1px 0 var(--border),
+        0 8px 18px #00000018;
+}
+.schema-diagram .svelte-flow__edge-path {
+    stroke: var(--diagram-edge-muted);
+    stroke-width: var(--diagram-edge-width, 1.5);
+    vector-effect: non-scaling-stroke;
+    shape-rendering: geometricPrecision;
+}
+.schema-diagram .svelte-flow__edge.related .svelte-flow__edge-path {
+    stroke: var(--accent);
+    stroke-width: var(--diagram-related-edge-width, 2.2);
+}
+.schema-diagram .svelte-flow__edge.kbd-focused .svelte-flow__edge-path {
+    stroke: var(--focus);
+    stroke-width: var(--diagram-related-edge-width, 2.2);
+    stroke-dasharray: 5 3;
+}
+.schema-diagram .svelte-flow__edge-label {
+    color: var(--diagram-edge-label-text);
+    background: var(--diagram-edge-label-bg);
+    border: 1px solid var(--diagram-edge);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: var(--diagram-label-size, 11px);
+    font-weight: 750;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+}
+.schema-diagram .svelte-flow__handle {
+    width: 1px;
+    height: 1px;
+    border: 0;
+    background: transparent;
+    opacity: 0;
+    pointer-events: none;
+}
+.schema-diagram .svelte-flow__node {
+    outline: none;
+}
+.schema-node {
+    width: var(--diagram-node-width, 278px);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--card);
+    box-shadow:
+        0 1px 0 var(--border),
+        0 8px 20px #00000012;
+    overflow: hidden;
+    color: var(--text);
+    contain: layout paint style;
+}
+.schema-node.selected,
+.schema-node.related {
+    border-color: var(--accent);
+    box-shadow:
+        0 0 0 1px var(--accent),
+        0 10px 22px #00000018;
+}
+.schema-node.dimmed {
+    opacity: 0.32;
+}
+.schema-node.kbd-focused {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+}
+.fk-inspector-actions {
+    display: flex;
+    gap: 8px;
+}
+.schema-node header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--density-space-2);
+    padding: var(--density-space-2) var(--density-space-3);
+    background: var(--subtle);
+    border-bottom: 1px solid var(--border);
+}
+.schema-node header span {
+    display: block;
+    color: var(--muted);
+    font-size: 0.6923rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+.schema-node header strong {
+    display: block;
+    margin-top: 3px;
+    font-size: 0.9231rem;
+    line-height: 1.25;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 210px;
+}
+.node-action {
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-weight: 700;
+}
+.node-action:hover {
+    background: var(--raised);
+}
+.schema-node-columns {
+    max-height: var(--diagram-node-column-max, 260px);
+    overflow: auto;
+    scrollbar-width: thin;
+}
+.schema-node-columns.names-only {
+    max-height: 220px;
+}
+.schema-column {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr) 58px 34px;
+    align-items: center;
+    gap: var(--density-space-2);
+    min-height: var(--diagram-column-height, 28px);
+    padding: var(--density-space-2) var(--density-space-3);
+    border-bottom: 1px solid var(--border-soft);
+    text-align: left;
+    font-size: 0.8462rem;
+    line-height: 1.25;
+    color: var(--text);
+    background: var(--card);
+}
+.schema-column.names-only {
+    grid-template-columns: 38px minmax(0, 1fr);
+}
+.schema-column:hover {
+    background: color-mix(in srgb, var(--card) 80%, var(--text) 8%);
+}
+.schema-column-more {
+    color: var(--accent-text);
+    font-weight: 700;
+}
+.column-markers {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--accent-text);
+}
+.column-markers > span {
+    width: 11px;
+}
+.column-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+}
+.column-type,
+.column-null {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: right;
+    color: var(--muted);
+    font-size: 0.6923rem;
+    font-family: var(--editor-font);
+    font-weight: 600;
+}
+.column-null {
+    font-family: inherit;
+    font-style: italic;
+}
+.schema-node footer {
+    display: flex;
+    align-items: center;
+    gap: var(--density-space-2);
+    padding: var(--density-space-2) var(--density-space-3);
+    background: var(--subtle);
+    border-top: 1px solid var(--border);
+}
+.schema-node footer button {
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    min-height: 24px;
+    padding: 3px 7px;
+    color: var(--text);
+    background: var(--surface);
+    font-size: 0.7692rem;
+    font-weight: 700;
+}
+.schema-node footer button:hover {
+    background: var(--raised);
+}
+.schema-node footer span {
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 0.6923rem;
+    font-weight: 700;
+}
+@media (prefers-reduced-motion: reduce) {
+    .schema-diagram .svelte-flow,
+    .schema-diagram .svelte-flow * {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+    }
+}
+@media (max-width: 900px) {
+    .diagram-workspace {
+        position: relative;
+    }
+    .diagram-inspector {
+        position: absolute;
+        z-index: 12;
+        inset: 0 0 0 auto;
+        width: min(340px, 90vw);
+        box-shadow: var(--shadow);
+        border-left: 1px solid var(--border);
+    }
+    .schema-diagram.config-open .diagram-canvas {
+        border-right: 0;
+    }
+    .diagram-config-panel {
+        right: auto;
+        left: 0;
+    }
+    .diagram-config-panel::before {
+        right: auto;
+        left: 18px;
+    }
+    .diagram-toggle-grid {
+        grid-template-columns: 1fr;
+    }
+}
+.schema-self-refs {
+    display: grid;
+    gap: 5px;
+    padding: 7px 8px;
+    border-bottom: 1px solid var(--border-soft);
+    background: color-mix(in srgb, var(--accent-soft) 28%, var(--surface));
+}
+.schema-self-ref {
+    display: grid;
+    grid-template-columns: 14px auto minmax(0, 1fr);
+    align-items: center;
+    gap: 7px;
+    min-height: 24px;
+    border: 1px solid color-mix(in srgb, var(--accent) 42%, var(--border));
+    border-radius: 5px;
+    padding: 4px 7px;
+    color: var(--accent-text);
+    background: var(--surface);
+    font-size: 0.7692rem;
+}
+.schema-self-ref span {
+    color: var(--muted);
+    font-size: 0.6923rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.schema-self-ref strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text);
+    font-family: var(--editor-font);
+    font-size: 0.7692rem;
+}
+/* Svelte Flow's own attribution stays visible (removing it needs their Pro
+   plan — see https://svelteflow.dev/remove-attribution) but its default
+   white pill looks jarring on a dark canvas; blend it into the theme
+   instead of hiding it. */
+.schema-diagram .svelte-flow__attribution,
+.explain-canvas .svelte-flow__attribution {
+    --xy-attribution-background-color: transparent;
+    padding: 3px 8px;
+    opacity: 0.5;
+}
+.schema-diagram .svelte-flow__attribution a,
+.explain-canvas .svelte-flow__attribution a {
+    color: var(--muted);
+    font-size: 9px;
+}

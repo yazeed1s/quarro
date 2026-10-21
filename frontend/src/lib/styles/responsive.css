@@ -1,0 +1,243 @@
+@media (max-width: 1200px) {
+    .inspector-wrapper,
+    .inspector-resizer {
+        display: none;
+    }
+    .results-body:has(.inspector-wrapper) {
+        position: relative;
+    }
+    .inspector-wrapper {
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        max-width: 80%;
+        z-index: 8;
+        box-shadow: var(--shadow);
+        border-left: 1px solid var(--border);
+    }
+    .results-body:has(.inspector-wrapper) .inspector-wrapper {
+        display: block;
+    }
+    .target {
+        gap: 5px;
+    }
+    .query-toolbar {
+        padding: 9px 12px;
+    }
+    .grid-toolbar-note {
+        display: none;
+    }
+    .grid-toolbar > .button {
+        margin-left: auto;
+    }
+    .settings-content {
+        padding: 22px;
+    }
+}
+@media (max-width: 1000px) {
+    .brand {
+        margin-right: calc(var(--header-gap) - 1px);
+    }
+    .sidebar-wrapper,
+    .sidebar-resizer {
+        display: none;
+    }
+    .workspace-layout:not(.sidebar-hidden) .sidebar-wrapper {
+        display: block;
+        position: absolute;
+        left: 0;
+        top: calc(var(--header-height) + var(--density-document-bar-height));
+        bottom: var(--density-status-height);
+        z-index: 15;
+        box-shadow: var(--shadow);
+        border-right: 1px solid var(--border);
+    }
+    .target > span:first-of-type {
+        display: none;
+    }
+    .session-select {
+        max-width: 190px;
+    }
+    .status-center {
+        display: none !important;
+    }
+    .settings-nav,
+    .connection-nav {
+        width: 165px;
+    }
+    .connection-card {
+        gap: 7px;
+    }
+    .connection-card > .environment {
+        display: none;
+    }
+    .results-footer > span:last-child {
+        display: none;
+    }
+    .chart-preview {
+        grid-template-columns: 1fr;
+        position: relative;
+    }
+    .chart-preview.view-open {
+        grid-template-columns: 1fr;
+    }
+    .chart-canvas-panel {
+        border-right: 0;
+        border-bottom: 1px solid var(--border-soft);
+    }
+    .chart-config-panel {
+        border-left: 0;
+    }
+    .chart-view-inspector {
+        position: absolute;
+        inset: 0 0 0 auto;
+        width: min(340px, 92vw);
+        max-width: 100%;
+        box-shadow: var(--shadow);
+    }
+}
+@media (max-width: 700px) {
+    .session-bar {
+        padding: 0 5px;
+        gap: 2px;
+    }
+    .session-actions {
+        gap: 3px;
+        padding-left: 0;
+    }
+    .session-actions > .preview-badge {
+        display: none;
+    }
+    .session-select {
+        max-width: 170px;
+    }
+    .query-toolbar {
+        gap: 5px;
+    }
+    .target {
+        font-size: 0.7692rem;
+    }
+    .target > .environment,
+    .toolbar-actions kbd {
+        display: none;
+    }
+    .toolbar-actions {
+        gap: 1px;
+    }
+    .toolbar-actions > .button:first-child {
+        display: none;
+    }
+    .results-header {
+        padding-left: 12px;
+        gap: 5px;
+    }
+    .result-tabs {
+        gap: 12px;
+    }
+    .execution-info {
+        font-size: 0.6923rem;
+    }
+    .grid-toolbar {
+        padding: 7px 10px;
+        gap: 7px;
+    }
+    .filter-field {
+        width: 180px;
+    }
+    .grid-toolbar .button {
+        font-size: 0.7692rem;
+    }
+    .settings-nav,
+    .connection-nav {
+        width: 52px;
+        padding: 12px 5px;
+        overflow: hidden;
+    }
+    .settings-nav > .search-field,
+    .settings-nav-bottom,
+    .connection-nav-bottom,
+    .connection-nav > .eyebrow {
+        display: none;
+    }
+    .settings-nav > button,
+    .connection-nav > button {
+        font-size: 0;
+        justify-content: center;
+        padding: 10px;
+    }
+    .settings-nav > button svg,
+    .connection-nav > button svg {
+        width: 18px;
+        height: 18px;
+    }
+    .settings-content,
+    .connection-content {
+        padding: 18px;
+    }
+    .setting-row {
+        gap: 12px;
+    }
+    .setting-row > input,
+    .setting-row > .select-control {
+        max-width: 125px;
+    }
+    .setting-row p {
+        font-size: 0.7692rem;
+    }
+    .modal-header {
+        padding: 18px;
+    }
+    .modal-header h2 {
+        font-size: 1.3846rem;
+    }
+    .connections-toolbar {
+        flex-wrap: wrap;
+    }
+    .connections-toolbar .search-field {
+        flex-basis: 100%;
+    }
+    .connection-card .dropdown {
+        display: none;
+    }
+    .theme-options {
+        gap: 7px;
+    }
+    .status-bar {
+        font-size: 0.6923rem;
+        padding: 0 8px;
+    }
+    .status-bar > span {
+        gap: 4px;
+    }
+    .object-views {
+        padding: 0 16px;
+        gap: 17px;
+    }
+    .appearance-preview {
+        overflow: auto;
+    }
+    .settings-heading .eyebrow {
+        font-size: 0.6154rem;
+    }
+    .shortcut-row {
+        flex-wrap: wrap;
+    }
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *:before,
+    *:after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+}
+:root[data-motion='reduced'] * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+}

@@ -1,0 +1,7 @@
+# Wails-scaffolded platform packaging (icons, Info.plist, NSIS/msix
+# installer templates, Xcode assets): generated once by wails3 init/build,
+# not hand-authored, shouldn't count toward the repo's language stats.
+build/** linguist-vendored
+
+# Regenerated wholesale by `wails3 generate bindings`; never hand-edited.
+frontend/bindings/** linguist-generated

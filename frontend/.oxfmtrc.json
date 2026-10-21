@@ -1,0 +1,12 @@
+{
+    "printWidth": 180,
+    "tabWidth": 4,
+    "useTabs": false,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "all",
+    "svelte": {
+        "indentScriptAndStyle": true,
+        "sortOrder": "options-scripts-markup-styles"
+    }
+}
